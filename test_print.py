@@ -6,7 +6,7 @@ import unittest
 import rsl2xtuml
 
 
-class TestIfStatements(unittest.TestCase):
+class TestPrint(unittest.TestCase):
 
     @rsl2xtuml.translate_docstring
     def testPrintString(self, s):

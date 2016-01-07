@@ -6,7 +6,7 @@ import unittest
 import rsl2xtuml
 
 
-class TestConstLiterals(unittest.TestCase):
+class TestStringFormat(unittest.TestCase):
 
     @rsl2xtuml.translate_docstring
     def testUpperCase(self, rc):
