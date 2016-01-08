@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # encoding: utf-8
 # Copyright (C) 2016 John Törnblom
 
@@ -9,234 +9,135 @@ import rsl2xtuml
 class TestBinOp(unittest.TestCase):
 
     @rsl2xtuml.translate_docstring
-    def testPlus(self, rc):
+    def test_plus(self, m):
         '.assign x = 1 + 1'
-        self.assertEqual('x = (1 + 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 + 1);')
         
     @rsl2xtuml.translate_docstring
-    def testMinus(self, rc):
+    def test_minus(self, m):
         '.assign x = 1 - 1'
-        self.assertEqual('x = (1 - 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 - 1);')
 
     @rsl2xtuml.translate_docstring
-    def testUnaryMinus(self, rc):
+    def test_unary_minus(self, m):
         '.assign x = 1 - -1'
-        self.assertEqual('x = (1 - (- 1));', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 - (- 1));')
         
     @rsl2xtuml.translate_docstring
-    def testMult(self, rc):
+    def test_mult(self, m):
         '.assign x = 2 * 2'
-        self.assertEqual('x = (2 * 2);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (2 * 2);')
         
     @rsl2xtuml.translate_docstring
-    def testDiv(self, rc):
+    def test_div(self, m):
         '.assign x = 10 / 2'
-        self.assertEqual('x = (10 / 2);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (10 / 2);')
         
     @rsl2xtuml.translate_docstring
-    def testLessTrue(self, rc):
+    def test_less(self, m):
         '.assign x = 0 < 1'
-        self.assertEqual('x = (0 < 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (0 < 1);')
         
     @rsl2xtuml.translate_docstring
-    def testLessFalse(self, rc):
-        '.assign x = 0 < 0'
-        self.assertEqual('x = (0 < 0);', rc)
-        
-    @rsl2xtuml.translate_docstring
-    def testLessEqTrue(self, rc):
+    def test_less_eq(self, m):
         '.assign x = 1 <= 1'
-        self.assertEqual('x = (1 <= 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 <= 1);')
         
     @rsl2xtuml.translate_docstring
-    def testLessEqFalse(self, rc):
-        '.assign x = 2 <= 1'
-        self.assertEqual('x = (2 <= 1);', rc)
-        
-    @rsl2xtuml.translate_docstring
-    def testNotEqFalse(self, rc):
+    def test_not_eq(self, m):
         '.assign x = 1 != 1'
-        self.assertEqual('x = (1 != 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 != 1);')
     
     @rsl2xtuml.translate_docstring
-    def testGreatEqFalse(self, rc):
+    def test_greater_eq(self, m):
         '.assign x = 1 >= 2'
-        self.assertEqual('x = (1 >= 2);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 >= 2);')
         
     @rsl2xtuml.translate_docstring
-    def testGreatEqTrue(self, rc):
-        '.assign x = 3 >= 2'
-        self.assertEqual('x = (3 >= 2);', rc)
-        
-    @rsl2xtuml.translate_docstring
-    def testNotEqTrue(self, rc):
-        '.assign x = 0 != 1'
-        self.assertEqual('x = (0 != 1);', rc)
-        
-    @rsl2xtuml.translate_docstring
-    def testEqFalse(self, rc):
+    def test_eq(self, m):
         '.assign x = 0 == 1'
-        self.assertEqual('x = (0 == 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (0 == 1);')
         
     @rsl2xtuml.translate_docstring
-    def testEqTrue(self, rc):
-        '.assign x = 1 == 1'
-        self.assertEqual('x = (1 == 1);', rc)
-        
-    @rsl2xtuml.translate_docstring
-    def testGroupedBinOp(self, rc):
+    def test_grouped_binop(self, m):
         '.assign x = (1 + 1)'
-        self.assertEqual('x = (1 + 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (1 + 1);')
         
     @rsl2xtuml.translate_docstring
-    def testChainedBinOp(self, rc):
+    def test_chained_binop(self, m):
         '.assign x = (1 + 1) + 1'
-        self.assertEqual('x = ((1 + 1) + 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = ((1 + 1) + 1);')
 
     @rsl2xtuml.translate_docstring
-    def testChainedUnaryOp(self, rc):
+    def test_chained_unaryop(self, m):
         '.assign x = not (1 == 1)'
-        self.assertEqual('x = (not (1 == 1));', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (not (1 == 1));')
 
     @rsl2xtuml.translate_docstring
-    def testAndBinOpTrue(self, rc):
+    def test_and(self, m):
         '.assign x = True and True'
-        self.assertEqual('x = (True and True);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (True and True);')
         
     @rsl2xtuml.translate_docstring
-    def testAndBinOpFalse(self, rc):
-        '.assign x = True and False'
-        self.assertEqual('x = (True and False);', rc)
-        
-    @rsl2xtuml.translate_docstring
-    def testOrBinOpTrue(self, rc):
+    def test_or(self, m):
         '.assign x = True or False'
-        self.assertEqual('x = (True or False);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (True or False);')
         
     @rsl2xtuml.translate_docstring
-    def testOrBinOpWithoutSpaces(self, rc):
+    def test_or_without_spaces(self, m):
         '.assign x = (True)or(False)'
-        self.assertEqual('x = (True or False);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (True or False);')
         
     @rsl2xtuml.translate_docstring
-    def testAndBinOpWithoutSpaces(self, rc):
-        '.assign x = (True)AND(True)'
-        self.assertEqual('x = (True and True);', rc)
+    def test_pipe(self, m):
+        '.assign a_set = a1_set | a2_set'
+        self.fail('test case evaluation not implemented')
         
     @rsl2xtuml.translate_docstring
-    def testOrBinOpFalse(self, rc):
-        '.assign x = False or False'
-        self.assertEqual('x = (False or False);', rc)
+    def test_ampesand(self, m):
+        '.assign a_set = a1_set & a2_set'
+        self.fail('test case evaluation not implemented')
+        
+    @rsl2xtuml.translate_docstring
+    def test_instance_plus_instance(self, m):
+        self.fail('test case not implemented')
+        
+    @rsl2xtuml.translate_docstring
+    def test_instance_minus_instance(self, m):
+        self.fail('test case not implemented')
     
-    @rsl2xtuml.translate_docstring
-    def testBinOpPipe(self, rc):
-        '''.//
-        .create object instance a1 of A
-        .create object instance a2 of A
-        .create object instance a3 of A
-        .assign a1.Name = "A1"
-        .assign a2.Name = "A2"
-        .assign a3.Name = "A3"
-        .//
-        .select any a1_set from instances of A where (selected.Name == "A1")
-        .select any a2_set from instances of A where (selected.Name == "A2")
-        .//
-        .assign a_set = a1_set | a2_set
-        .assign x = cardinality a_set
-        '''
-        lines = rc.splitlines()
-        self.assertEqual('create object instance a1 of A;', lines.pop(0))
-        self.assertEqual('create object instance a2 of A;', lines.pop(0))
-        self.assertEqual('create object instance a3 of A;', lines.pop(0))
-        self.assertEqual('a1.Name = "A1";', lines.pop(0))
-        self.assertEqual('a2.Name = "A2";', lines.pop(0))
-        self.assertEqual('a3.Name = "A3";', lines.pop(0))
-        self.assertEqual('select any a1_set from instances of A where (selected.Name == "A1");', lines.pop(0))
-        self.assertEqual('select any a2_set from instances of A where (selected.Name == "A2");', lines.pop(0))
-        self.assertEqual('a_set = (a1_set | a2_set);', lines.pop(0))
-        self.assertEqual('x = (cardinality a_set);', lines.pop(0))
-        
-    @rsl2xtuml.translate_docstring
-    def testBinOpAmpesand(self, rc):
-        '''.//
-        .create object instance a1 of A
-        .create object instance a2 of A
-        .create object instance a3 of A
-        .assign a1.Name = "A1"
-        .assign a2.Name = "A2"
-        .assign a3.Name = "A3"
-        .//
-        .select any a1_set from instances of A where (selected.Name == "A1")
-        .select any a2_set from instances of A where (selected.Name == "A2")
-        .//
-        .assign a_set = a1_set & a2_set
-        .assign x = cardinality a_set
-        '''
-        lines = rc.splitlines()
-        self.assertEqual('create object instance a1 of A;', lines.pop(0))
-        self.assertEqual('create object instance a2 of A;', lines.pop(0))
-        self.assertEqual('create object instance a3 of A;', lines.pop(0))
-        self.assertEqual('a1.Name = "A1";', lines.pop(0))
-        self.assertEqual('a2.Name = "A2";', lines.pop(0))
-        self.assertEqual('a3.Name = "A3";', lines.pop(0))
-        self.assertEqual('select any a1_set from instances of A where (selected.Name == "A1");', lines.pop(0))
-        self.assertEqual('select any a2_set from instances of A where (selected.Name == "A2");', lines.pop(0))
-        self.assertEqual('a_set = (a1_set & a2_set);', lines.pop(0))
-        self.assertEqual('x = (cardinality a_set);', lines.pop(0))
-        
-    @rsl2xtuml.translate_docstring    
-    def testInstancePlusInstance(self, rc):
-        '''.//
-        .create object instance a1 of A
-        .create object instance a2 of A
-        .assign a1.Name = "A1"
-        .assign a2.Name = "A2"
-        .//
-        .assign a_set = a1 + a2
-        .assign x = cardinality a_set
-        '''
-        lines = rc.splitlines()
-        self.assertEqual('create object instance a1 of A;', lines.pop(0))
-        self.assertEqual('create object instance a2 of A;', lines.pop(0))
-        self.assertEqual('a1.Name = "A1";', lines.pop(0))
-        self.assertEqual('a2.Name = "A2";', lines.pop(0))
-        self.assertEqual('a_set = (a1 + a2);', lines.pop(0))
-        self.assertEqual('x = (cardinality a_set);', lines.pop(0))
-        
-    @rsl2xtuml.translate_docstring
-    def testInstanceMinusInstance(self, rc):
-        '''.//
-        .create object instance a1 of A
-        .create object instance a2 of A
-        .assign a1.Name = "A1"
-        .assign a2.Name = "A2"
-        .//
-        .assign a_set = a1 - a2
-        .assign x = cardinality a_set
-        '''
-        lines = rc.splitlines()
-        self.assertEqual('create object instance a1 of A;', lines.pop(0))
-        self.assertEqual('create object instance a2 of A;', lines.pop(0))
-        self.assertEqual('a1.Name = "A1";', lines.pop(0))
-        self.assertEqual('a2.Name = "A2";', lines.pop(0))
-        self.assertEqual('a_set = (a1 - a2);', lines.pop(0))
-        self.assertEqual('x = (cardinality a_set);', lines.pop(0))
-    
-    @rsl2xtuml.translate_docstring
-    def testInstanceMinusSameInstance(self, rc):
-        '''.//
-        .create object instance a1 of A
-        .assign a1.Name = "A1"
-        .//
-        .assign a_set = a1 - a1
-        .assign x = cardinality a_set
-        '''
-        lines = rc.splitlines()
-        self.assertEqual('create object instance a1 of A;', lines.pop(0))
-        self.assertEqual('a1.Name = "A1";', lines.pop(0))
-        self.assertEqual('a_set = (a1 - a1);', lines.pop(0))
-        self.assertEqual('x = (cardinality a_set);', lines.pop(0))
-        
 
 if __name__ == '__main__':
     unittest.main()

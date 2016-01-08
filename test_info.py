@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # encoding: utf-8
 # Copyright (C) 2016 John Törnblom
 
@@ -9,14 +9,18 @@ import rsl2xtuml
 class TestInfo(unittest.TestCase):
 
     @rsl2xtuml.translate_docstring
-    def testVersion(self, rc):
+    def testVersion(self, m):
         '.assign x = "${info.Interpreter_Version}"'
-        self.assertEqual('x = INFO::interpreter_version();', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = INFO::interpreter_version();')
 
     @rsl2xtuml.translate_docstring
-    def testPlatform(self, rc):
+    def testPlatform(self, m):
         '.assign x = "${info.interpreter_platform}"'
-        self.assertEqual('x = INFO::interpreter_platform();', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = INFO::interpreter_platform();')
         
 
 if __name__ == '__main__':

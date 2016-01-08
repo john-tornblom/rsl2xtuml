@@ -1,40 +1,50 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # encoding: utf-8
 # Copyright (C) 2016 John Törnblom
 
 import unittest
 import rsl2xtuml
 
+from xtuml import where_eq as where
+
 
 class TestInvoke(unittest.TestCase):
 
     @rsl2xtuml.translate_docstring
-    def test_invoke_without_arguments(self, rc):
+    def test_invoke_without_arguments(self, m):
         '.invoke f()'
-        self.assertEqual('::f();', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         '::f();')
         
     @rsl2xtuml.translate_docstring
-    def test_nvoke_with_dot_in_name(self, rc):
+    def test_invoke_with_dot_in_name(self, m):
         '.invoke module.f()'
-        self.assertEqual('::module_f();', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual('::module_f();', 
+                         s_sync.Action_Semantics_internal)
 
     @rsl2xtuml.translate_docstring
-    def test_invoke_with_return_value(self, rc):
+    def test_invoke_with_return_value(self, m):
         '.invoke res = f()'
-        self.assertEqual('res = ::f();', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual('res = ::f();',
+                         s_sync.Action_Semantics_internal)
 
     @rsl2xtuml.translate_docstring
-    def test_invoke_with_parameter(self, rc):
+    def test_invoke_with_parameter(self, m):
         '''.//
         .function f
             .param integer x
         .end function
         .invoke f(1)
         .//'''
-        self.assertEqual('::f(x: 1);', rc)
+        s_sync = m.select_any('S_SYNC', where(Name='test_invoke_with_parameter'))
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         '::f(x: 1);')
 
     @rsl2xtuml.translate_docstring
-    def testParameterOrder(self, rc):
+    def test_parameter_order(self, m):
         '''.//
         .function f
             .param integer x
@@ -43,7 +53,9 @@ class TestInvoke(unittest.TestCase):
         .end function
         .invoke f(1, true, "s")
         .//'''
-        self.assertEqual('::f(x: 1, y: true, z: "s");', rc)
+        s_sync = m.select_any('S_SYNC', where(Name='test_parameter_order'))
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         '::f(x: 1, y: true, z: "s");')
 
 
 

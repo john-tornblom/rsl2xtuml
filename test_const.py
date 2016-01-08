@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # encoding: utf-8
 # Copyright (C) 2016 John Törnblom
 
@@ -9,44 +9,60 @@ import rsl2xtuml
 class TestConstLiterals(unittest.TestCase):
 
     @rsl2xtuml.translate_docstring
-    def testPositiveInteger(self, rc):
+    def test_positive_integer(self, m):
         '.assign x = 1'
-        self.assertEqual('x = 1;', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = 1;')
 
     @rsl2xtuml.translate_docstring
-    def testNegativeInteger(self, rc):
+    def test_negative_integer(self, m):
         '.assign x = -1'
-        self.assertEqual('x = (- 1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (- 1);')
 
     @rsl2xtuml.translate_docstring
-    def testPositiveReal(self, rc):
+    def test_positive_real(self, m):
         '.assign x = 1.1'
-        self.assertEqual('x = 1.1;', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = 1.1;')
         
     @rsl2xtuml.translate_docstring
-    def testNegativeReal(self, rc):
+    def test_negative_real(self, m):
         '.assign x = -1.1'
-        self.assertEqual('x = (- 1.1);', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = (- 1.1);')
 
     @rsl2xtuml.translate_docstring
-    def testTrue(self, rc):
+    def test_true(self, m):
         '.assign x = true'
-        self.assertEqual('x = true;', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = true;')
         
     @rsl2xtuml.translate_docstring
-    def testFalse(self, rc):
+    def test_false(self, m):
         '.assign x = false'
-        self.assertEqual('x = false;', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = false;')
         
     @rsl2xtuml.translate_docstring
-    def testString(self, rc):
+    def test_string(self, m):
         '.assign x = "Hello"'
-        self.assertEqual('x = "Hello";', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = "Hello";')
 
     @rsl2xtuml.translate_docstring
-    def testEmptyString(self, rc):
+    def test_empty_string(self, m):
         '.assign x = ""'
-        self.assertEqual('x = "";', rc)
+        s_sync = m.select_any('S_SYNC')
+        self.assertEqual(s_sync.Action_Semantics_internal,
+                         'x = "";')
         
 
 if __name__ == '__main__':

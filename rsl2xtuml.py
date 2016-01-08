@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
+import functools
 import sys
 import logging
 import types
@@ -12,17 +13,20 @@ from xtuml import relate
 
 
 logger = logging.getLogger(__name__)
-
+    
 
 class ActionTranslation(xtuml.tools.Walker):
 
     def __init__(self, metamodel):
-        self.scope_level = -1
-        self.m = metamodel
         xtuml.tools.Walker.__init__(self)
+        self.m = metamodel
+        self.scope_level = -1
         
-    def default_accept(self, node, **kwargs):
-        raise Exception('Unhandled node %s' % node)
+    def enter_scope(self):
+        self.scope_level += 1
+        
+    def leave_scope(self):
+        self.scope_level -= 1
     
     def linebreak(self):
         return '\n' + '    ' * self.scope_level
@@ -35,11 +39,17 @@ class ActionTranslation(xtuml.tools.Walker):
             yield s_sparm.Name
             s_sparm = one(s_sparm).S_SPARM[54, 'succeeds']()
         
+    def join(self, node):
+        return ''.join(self.accept(node))
+    
+    def default_accept(self, node, **kwargs):
+        raise Exception('Unhandled node %s' % node)
+    
     def accept_BodyNode(self, node):
-        yield from self.accept(node.statement_list)
+        yield self.join(node.statement_list)
         
     def accept_StatementListNode(self, node):
-        self.scope_level += 1
+        self.enter_scope()
         
         for stmt in node.statements:
             stmt = ''.join(self.accept(stmt))
@@ -48,19 +58,19 @@ class ActionTranslation(xtuml.tools.Walker):
                 yield stmt
                 yield ';'
             
-        self.scope_level -= 1
+        self.leave_scope()
         yield self.linebreak()
         
     def accept_WhileNode(self, node):
         yield 'while '
-        yield from self.accept(node.cond)
-        yield from self.accept(node.statement_list)
+        yield self.join(node.cond)
+        yield self.join(node.statement_list)
         yield 'end while'
     
     def accept_ForNode(self, node):
         yield 'for each %s ' % node.variable_name
         yield 'in %s' % node.set_name
-        yield from self.accept(node.statement_list)
+        yield self.join(node.statement_list)
         yield 'end for'
         
     def accept_BreakNode(self, node):
@@ -68,32 +78,35 @@ class ActionTranslation(xtuml.tools.Walker):
         
     def accept_IfNode(self, node):
         yield 'if '
-        yield from self.accept(node.cond)
-        yield from self.accept(node.iftrue)
-        yield from self.accept(node.elif_list)
-        yield 'else'
-        yield from self.accept(node.iffalse)
-        yield 'end if'
+        yield self.join(node.cond)
+        yield self.join(node.iftrue)
+        
+        yield self.join(node.elif_list)
+        
+        if node.iffalse:
+            yield 'else'
+            yield self.join(node.iffalse)
+            yield 'end if'
         
     def accept_ElIfListNode(self, node):
         for elif_ in node.elifs:
-            yield from self.accept(elif_)
+            yield self.join(elif_)
         
     def accept_ElIfNode(self, node):
         yield 'elif '
-        yield from self.accept(node.cond)
-        yield from self.accept(node.statement_list)
+        yield self.join(node.cond)
+        yield self.join(node.statement_list)
         
     def accept_AssignNode(self, node):
-        yield from self.accept(node.variable)
+        yield self.join(node.variable)
         yield ' = '
-        yield from self.accept(node.expr)
+        yield self.join(node.expr)
         
     def accept_BinaryOpNode(self, node):
         yield '('
-        yield from self.accept(node.left)
+        yield self.join(node.left)
         yield ' %s ' % node.sign
-        yield from self.accept(node.right)
+        yield self.join(node.right)
         yield ')'
     
     def accept_UnaryOpNode(self, node):
@@ -108,14 +121,14 @@ class ActionTranslation(xtuml.tools.Walker):
         else:
             yield '%s ' % node.sign
             
-        yield from self.accept(node.value)
+        yield self.join(node.value)
         yield ')'
         
     def accept_VariableAccessNode(self, node):
         yield node.name
     
     def accept_FieldAccessNode(self, node):
-        yield from self.accept(node.variable)
+        yield self.join(node.variable)
         yield '.'
         yield node.field
     
@@ -135,7 +148,7 @@ class ActionTranslation(xtuml.tools.Walker):
         prefix = ''
         for value in node.values:
             yield prefix
-            yield from self.accept(value)
+            yield self.join(value)
             prefix = ' + '
             
     def accept_CreateNode(self, node):
@@ -145,38 +158,38 @@ class ActionTranslation(xtuml.tools.Walker):
     def accept_SelectAnyInstanceNode(self, node):
         yield 'select any %s ' % node.variable_name
         yield 'from instances of %s' % node.key_letter
-        yield from self.accept(node.where)
+        yield self.join(node.where)
 
     def accept_SelectManyInstanceNode(self, node):
         yield 'select many %s ' % node.variable_name
         yield 'from instances of %s' % node.key_letter
-        yield from self.accept(node.where)
+        yield self.join(node.where)
     
     def accept_SelectOneNode(self, node):
         yield 'select one %s related by ' % node.variable_name
-        yield from self.accept(node.instance_chain)
-        yield from self.accept(node.where)
+        yield self.join(node.instance_chain)
+        yield self.join(node.where)
                                                    
     def accept_SelectAnyNode(self, node):
         yield 'select any %s related by ' % node.variable_name
-        yield from self.accept(node.instance_chain)
-        yield from self.accept(node.where)
+        yield self.join(node.instance_chain)
+        yield self.join(node.where)
                                                    
     def accept_SelectManyNode(self, node):
         yield 'select many %s related by ' % node.variable_name
-        yield from self.accept(node.instance_chain)
-        yield from self.accept(node.where)
+        yield self.join(node.instance_chain)
+        yield self.join(node.where)
                                                    
     def accept_InstanceChainNode(self, node):
-        yield from self.accept(node.variable)
+        yield self.join(node.variable)
         for nav in node.navigations:
             yield '->'
-            yield from self.accept(nav)
+            yield self.join(nav)
     
     def accept_NavigationNode(self, node):
         yield node.key_letter
         yield '['
-        yield from self.accept(node.relation)
+        yield self.join(node.relation)
         yield ']'
     
     def accept_RelationNode(self, node):
@@ -187,28 +200,28 @@ class ActionTranslation(xtuml.tools.Walker):
     def accept_WhereNode(self, node):
         if node.expr:
             yield ' where '
-            yield from self.accept(node.expr)
+            yield self.join(node.expr)
     
     def accept_SubstitutionVariableNode(self, node):
         if node.formats:
-            yield 'TMPL::transform(format: '
-            yield '"%s"' % ''.join(node.formats)
-            yield ', text: '
+            yield 'TMPL::transform(format: "'
+            yield ''.join(node.formats)
+            yield '", text: '
             
-        yield from self.accept(node.expr)
+        yield self.join(node.expr)
         
         if node.formats:
             yield ')'    
     
     def accept_SubstitutionNavigationNode(self, node):
-        yield from self.accept(node.variable)
+        yield self.join(node.variable)
         logger.warning('surpressing navigation in where clause')
         #yield '->'
         #yield from self.accept(node.navigation)
         
     def accept_PrintNode(self, node):
         yield 'LOG::LogInfo(message: '
-        yield from self.accept(node.value_list)
+        yield self.join(node.value_list)
         yield ')'
     
     def accept_LiteralListNode(self, node):
@@ -218,7 +231,7 @@ class ActionTranslation(xtuml.tools.Walker):
             yield '""'
             
         for literal in node.literals:
-            yield from self.accept(literal)
+            yield self.join(literal)
             yield ' + '
         
         yield '"\\n"'
@@ -229,14 +242,14 @@ class ActionTranslation(xtuml.tools.Walker):
     
     def accept_EmitNode(self, node):
         yield 'TMPL::emit(filename: '
-        yield from self.accept(node.emit_filename)
+        yield self.join(node.emit_filename)
         yield ')'
         
     def accept_ParseKeywordNode(self, node):
         yield 'TMPL::parse_keyword(value: '
-        yield from self.accept(node.expr)
+        yield self.join(node.expr)
         yield ', keyword: '
-        yield from self.accept(node.keyword)
+        yield self.join(node.keyword)
         yield ')'
         
     def accept_ClearNode(self, node):
@@ -246,7 +259,7 @@ class ActionTranslation(xtuml.tools.Walker):
         yield 'ARCH::exit(status: '
         
         if node.return_code:
-            yield from self.accept(node.return_code)
+            yield self.join(node.return_code)
         else:
             yield '0'
             
@@ -268,8 +281,7 @@ class ActionTranslation(xtuml.tools.Walker):
         
     def accept_ArgumentListNode(self, node):
         for arg in reversed(node.arguments):
-            arg = ''.join(self.accept(arg))
-            yield arg
+            yield self.join(arg)
             
     def accept_FunctionNode(self, node):
         pe_pe = self.m.new('PE_PE')
@@ -277,9 +289,9 @@ class ActionTranslation(xtuml.tools.Walker):
         relate(pe_pe, s_sync, 8001)
 
         prev = None
-        for name, ty in self.accept(node.parameter_list):
-            s_dt = self.m.select_one('S_DT', where(Name=ty))
-            s_sparm = self.m.new('S_SPARM', Name=name)
+        for param in node.parameter_list.parameters:
+            s_dt = self.m.select_one('S_DT', where(Name=param.type))
+            s_sparm = self.m.new('S_SPARM', Name=param.name)
             
             relate(s_sparm, s_sync, 24)
             relate(s_sparm, s_dt, 26)
@@ -289,30 +301,23 @@ class ActionTranslation(xtuml.tools.Walker):
         
         t = ActionTranslation(self.m)
         strings = t.accept(node.statement_list)
-        s_sync.Action_Semantics_Internal = ''.join(strings).strip()
+        s_sync.Action_Semantics_internal = ''.join(strings).strip('\n ')
     
         yield ''
-        
-    def accept_ParameterListNode(self, node):
-        for param in node.parameters:
-            yield from self.accept(param)
-    
-    def accept_ParameterNode(self, node):
-        yield (node.name, node.type.lower())
     
     
 def translate_text(metamodel, s):
     t = ActionTranslation(metamodel)
     root = rsl.parse_text(s)
     strings = t.accept(root)
-    return ''.join(strings).strip()
+    return ''.join(strings).strip('\n ')
 
 
 def translate_file(metamodel, filename):
     t = ActionTranslation(metamodel)
     root = rsl.parse_file(filename)
     strings = t.accept(root)
-    return ''.join(strings).strip()
+    return ''.join(strings).strip('\n ')
 
 
 def translate_docstring(fn):
@@ -320,12 +325,18 @@ def translate_docstring(fn):
     decorator function for translating the docstring of a function
     from rsl to oal.
     '''
+    @functools.wraps(fn)
     def wrapper(*args):
         m = ooaofooa.empty_model()
-        s = translate_text(m, fn.__doc__)
+        
+        pe_pe = m.new('PE_PE')
+        s_sync = m.new('S_SYNC', Name=fn.__name__)
+        relate(pe_pe, s_sync, 8001)
+        
+        s_sync.Action_Semantics_internal = translate_text(m, fn.__doc__)
         
         args = list(args)
-        args.append(s)
+        args.append(m)
         fn(*args)
         
     return wrapper
